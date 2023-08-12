@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Entity
 {
-    internal class Treatment
+    [Owned]
+    public class Treatment : Entity
     {
+        public string? Medicines { get; set; }
+        public string? Procedures { get; set; }
+        public string? Recommendations { get; set; }
     }
 }
