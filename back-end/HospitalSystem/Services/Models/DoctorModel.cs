@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Services.Models
 {
-    public class DoctorModel
+    public class DoctorModel : UserModel
     {
     }
 }
