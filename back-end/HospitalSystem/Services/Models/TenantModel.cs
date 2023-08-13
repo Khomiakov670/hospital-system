@@ -1,6 +1,9 @@
-﻿namespace Services.Models
+﻿using DataAccess.Entity;
+
+namespace Services.Models
 {
-    internal class TenantModel
+    public class TenantModel: EntityModel
     {
+        public int WardId { get; set; }
     }
 }

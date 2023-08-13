@@ -1,5 +1,4 @@
-﻿using BusinessLogicLayer.Services;
-using DataAccess;
+﻿using DataAccess;
 using DataAccess.Entity;
 using FluentResults;
 using Mapster;
@@ -10,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using PasswordGenerator;
 using Services.Constants;
+using Services.Interfaces;
 using Services.Models;
 using Services.Models.Register;
 using System.Linq.Expressions;

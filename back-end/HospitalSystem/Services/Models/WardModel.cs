@@ -1,6 +1,11 @@
-﻿namespace Services.Models
+﻿using DataAccess.Entity;
+
+namespace Services.Models
 {
-    internal class WardModel
+    public class WardModel: EntityModel
     {
+        public int Floor { get; set; }
+        public string Type { get; set; } = null!;
+        public int Capacity { get; set; }
     }
 }

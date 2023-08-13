@@ -1,6 +1,6 @@
 ﻿namespace Services.Models
 {
-    internal class EntityModel
+    public class EntityModel
     {
     }
 }

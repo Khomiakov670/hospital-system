@@ -1,4 +1,4 @@
-﻿namespace BusinessLogicLayer.Services
+﻿namespace Services.Interfaces
 {
     public interface IEmailService
     {

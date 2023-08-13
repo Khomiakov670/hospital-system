@@ -1,6 +1,9 @@
 ﻿namespace Services.Models
 {
-    internal class TreatmentModel
+    public class TreatmentModel: EntityModel
     {
+        public string? Medicines { get; set; }
+        public string? Procedures { get; set; }
+        public string? Recommendations { get; set; }
     }
 }

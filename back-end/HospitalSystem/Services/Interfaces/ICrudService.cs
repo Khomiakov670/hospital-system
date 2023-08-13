@@ -1,6 +1,6 @@
 ﻿using FluentResults;
 
-namespace BusinessLogicLayer.Services
+namespace Services.Interfaces
 {
     public interface ICrudService<TModel> where TModel : class
     {
