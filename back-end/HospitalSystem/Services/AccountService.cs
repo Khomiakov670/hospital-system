@@ -17,7 +17,7 @@ using System.Security.Claims;
 using System.Text.Encodings.Web;
 namespace Services
 {
-    public class AccountService
+    public class AccountService : IAccountService
     {
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
@@ -56,7 +56,7 @@ namespace Services
             return HandleResult(result);
         }
 
-        
+
 
         public async Task<Result> LoginAsync(string email, string password)
         {
@@ -124,12 +124,12 @@ namespace Services
 
         public string? GetUserId(ClaimsPrincipal principal) => userManager.GetUserId(principal);
 
-        public Task<PageModel<UserModel>> GetPatientsAsync(int page, string query) => GetUsers<UserModel,Patient>(page, query);
+        public Task<PageModel<UserModel>> GetPatientsAsync(int page, string query) => GetUsers<UserModel, Patient>(page, query);
 
         public Task<PageModel<DoctorModel>> GetDoctorsAsync(int page, string query, string? specialization = null)
         {
             Expression<Func<Doctor, bool>>? predicate = specialization is null ? null : x => x.Specialization == specialization;
-            return GetUsers<DoctorModel,Doctor>(page,query,predicate);
+            return GetUsers<DoctorModel, Doctor>(page, query, predicate);
         }
 
         private async Task<PageModel<TModel>> GetUsers<TModel, TEntity>(int page, string query, Expression<Func<TEntity, bool>>? predicate = null)

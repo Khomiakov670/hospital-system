@@ -11,14 +11,15 @@ using System.Linq.Expressions;
 
 namespace BusinessLogicLayer.Services
 {
-    public class CrudService<TModel, TEntity> : ICrudService<TModel> where TModel : class
+    public class CrudService<TModel, TEntity> : ICrudService<TModel> 
+        where TModel : class
         where TEntity : class
 
     {
         protected readonly ApplicationContext _context;
         protected readonly UserManager<User> _userManager;
 
-        public CrudService(UserManager<User> userManager, ApplicationContext context)
+        public CrudService(ApplicationContext context, UserManager<User> userManager)
         {
             _userManager = userManager;
             _context = context;

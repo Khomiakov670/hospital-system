@@ -1,30 +1,17 @@
 ﻿using DataAccess.Entity;
 using DataAccess;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using System.Linq.Expressions;
-using System.Security.Claims;
+using BusinessLogicLayer.Services;
+using Services.Models;
 
 namespace Services
 {
-    public class RecordService
+    public class RecordService : CrudService<RecordModel, Record>
     {
-        private readonly ApplicationContext context;
-        private readonly UserManager<User> userManager;
-        private readonly IConfiguration configuration;
-
-        public RecordService(ApplicationContext context, UserManager<User> userManager)
+        public RecordService(ApplicationContext context, UserManager<User> userManager) : base(context, userManager)
         {
-            this.context = context;
-            this.userManager = userManager;
-            this.configuration = configuration;
         }
-
-       
+         
     }
 }
