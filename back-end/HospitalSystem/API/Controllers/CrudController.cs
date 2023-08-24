@@ -15,9 +15,9 @@ namespace API.Controllers
         where TModel : EntityModel
         where TRequest : IRequestBody
     {
-        protected readonly ICrudService<TModel> patient;
+        protected readonly ICrudService<TModel> service;
 
-        protected CrudController(ICrudService<TModel> service) => this.patient = service;
+        protected CrudController(ICrudService<TModel> service) => this.service = service;
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -26,7 +26,7 @@ namespace API.Controllers
         public virtual async Task<ActionResult<TModel>> AddAsync([FromBody] TRequest request)
         {
             var model = request.Adapt<TModel>();
-            var result = await patient.AddAsync(model);
+            var result = await service.AddAsync(model);
             return HandleResult(result);
         }
 
@@ -38,7 +38,7 @@ namespace API.Controllers
         {
             var model = request.Adapt<TModel>();
             model.Id = id;
-            var result = await patient.EditAsync(model);
+            var result = await service.EditAsync(model);
             return HandleResult(result);
         }
 
@@ -48,7 +48,7 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public virtual async Task<IActionResult> DeleteAsync(int id)
         {
-            var result = await patient.DeleteAsync(id);
+            var result = await service.DeleteAsync(id);
             return HandleResult(result);
         }
     }

@@ -6,25 +6,27 @@ using BusinessLogicLayer.Services;
 using Services.Models;
 using System.Security.Claims;
 using Mapster;
+using Microsoft.EntityFrameworkCore;
 
 namespace Services
 {
     public class RecordService : CrudService<RecordModel, Record>
     {
         private readonly UserManager<User> userManager;
-        public RecordService(ApplicationContext context, UserManager<User> userManager) : base(context, userManager)
+        public RecordService(ApplicationContext context, UserManager<User> userManager, IConfiguration configuration) : base(context, userManager)
         {
-            this.userManager = userManager;
         }
-        /*public async Task<PageModel<RecordModel>> GetPatientHistory(string patientId, int page, string query) =>
-            await base.GetAsync(page: page,
-                                predicate: x => x.PatientId == patientId
-                                                && x.IsCured == true,
-                                keySelectors: x => x.Id);*/
-        /*public async Task<PageModel<Record>> GetAsync(ClaimsPrincipal principal, int page, string query)
+        public async Task<PageModel<RecordModel>> GetHistoryAsync(string patientId,  int page)
         {
-            var patientId = userManager.GetUserId(principal);
-            return await GetPatientHistory(patientId!, page, query);
-        }*/
+            var enumerable = await _context.Set<Record>()
+                .Where(x => x.PatientId == patientId && x.IsCured == true)
+                .OrderBy(x => x.DateOfClose)
+                .ToListAsync();
+            var entities = enumerable.Skip((page - 1) * 10)
+                .Take(10)
+                .ToList();
+            var models = entities.Adapt<List<RecordModel>>();
+            return new PageModel<RecordModel>(models, enumerable.Count());
+        }
     }
 }

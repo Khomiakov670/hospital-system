@@ -2,24 +2,36 @@
 using Microsoft.AspNetCore.Mvc;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Microsoft.AspNetCore.Identity;
+using FluentResults;
+using Services.Constants;
 
 namespace API.Controllers
 {
     public abstract class BaseController : ControllerBase
     {
-        protected ActionResult<T> Created<T>(T value) => CreatedAtAction(null, value);
-        protected ActionResult BadRequest(params string[] errors) => Error(errors, StatusCodes.Status400BadRequest);
-        protected new ActionResult Forbid(params string[] errors) => Error(errors, StatusCodes.Status403Forbidden);
-        protected ActionResult NotFound(params string[] errors) => Error(errors, StatusCodes.Status404NotFound);
-        private ActionResult Error(IEnumerable<string> errors, int statusCode)
+        protected ActionResult<T> HandleResult<T>(Result<T> result) => result.IsSuccess ? result.ValueOrDefault : Error(result);
+        protected ActionResult<T> HandleCreatedResult<T>(Result<T> result) => result.IsSuccess ? Created(result.ValueOrDefault) : Error(result);
+        protected ActionResult HandleResult(Result result) => result.IsSuccess ? Ok() : Error(result);
+        private ActionResult Error(ResultBase result)
+        {
+            return result.Errors[0].Message switch
+            {
+                Errors.NotFound => NotFound(result.Errors),
+                Errors.Forbidden => Forbid(result.Errors),
+                _ => BadRequest(result.Errors)
+            };
+        }
+
+        private ActionResult<T> Created<T>(T value) => CreatedAtAction(null, value);
+        private ActionResult BadRequest(IEnumerable<IError> errors) => Error(errors, StatusCodes.Status400BadRequest);
+        private ActionResult Forbid(IEnumerable<IError> errors) => Error(errors, StatusCodes.Status403Forbidden);
+        private ActionResult NotFound(IEnumerable<IError> errors) => Error(errors, StatusCodes.Status404NotFound);
+        private ActionResult Error(IEnumerable<IError> errors, int statusCode)
         {
             ModelStateDictionary pairs = new();
             foreach (var error in errors)
-                pairs.AddModelError(string.Empty, error);
+                pairs.AddModelError(Errors.Common, error.Message);
             return ValidationProblem(statusCode: statusCode, modelStateDictionary: pairs);
         }
-        protected ActionResult HandleResult(IdentityResult result) => result.Succeeded
-            ? Ok()
-            : BadRequest(result.Errors.Select(e => e.Description).ToArray());
     }
 }

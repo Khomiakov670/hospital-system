@@ -7,5 +7,6 @@
         public const string Forbidden = nameof(Forbidden);
         public const string PasswordAreNotTheSame = nameof(PasswordAreNotTheSame);
         public const string InvalidCredentials = nameof(InvalidCredentials);
+
     }
 }
