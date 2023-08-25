@@ -1,22 +1,22 @@
-﻿using BusinessLogicLayer.Services;
-using DataAccess;
+﻿using DataAccess;
 using DataAccess.Entity;
 using Microsoft.AspNetCore.Identity;
 using Services.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Services
+namespace Services;
+
+public class TenantService : CrudService<TenantModel, Tenant>
 {
-    public class TenantService : CrudService<TenantModel, Tenant>
+    public TenantService(ApplicationContext context, UserManager<User> userManager) : base(context, userManager)
     {
-        private readonly UserManager<User> userManager;
-        public TenantService(ApplicationContext context, UserManager<User> userManager) : base(context, userManager)
-        {
-            this.userManager = userManager;
-        }
+    }
+    public async Task<PageModel<TenantModel>> GetAsync(int page, int serialNumber, int functional, int wardNumber)
+    {
+        return await GetAsync(page, x => 
+                x.Apparatus.Functiional == functional || 
+                x.Apparatus.SerialNumber == serialNumber||
+                x.WardId == wardNumber, 
+            false, 
+            x => x.Apparatus.Functiional);
     }
 }

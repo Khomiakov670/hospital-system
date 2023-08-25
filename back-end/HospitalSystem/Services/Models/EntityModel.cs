@@ -1,7 +1,6 @@
-﻿namespace Services.Models
+﻿namespace Services.Models;
+
+public class EntityModel
 {
-    public class EntityModel
-    {
-        public int Id { get; set; }
-    }
+    public int Id { get; set; }
 }

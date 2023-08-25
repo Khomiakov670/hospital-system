@@ -1,9 +1,8 @@
-﻿namespace Services.Models
+﻿namespace Services.Models;
+
+public class TreatmentModel : EntityModel
 {
-    public class TreatmentModel: EntityModel
-    {
-        public string? Medicines { get; set; }
-        public string? Procedures { get; set; }
-        public string? Recommendations { get; set; }
-    }
+    public string? Medicines { get; set; }
+    public string? Procedures { get; set; }
+    public string? Recommendations { get; set; }
 }

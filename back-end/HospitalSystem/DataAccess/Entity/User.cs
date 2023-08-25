@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace DataAccess.Entity
+namespace DataAccess.Entity;
+
+public class User : IdentityUser
 {
-    public class User:IdentityUser
-    {
-        public string FullName { get; set; } = null!;
-        public string Gender { get; set; } = null!;
-        public DateTime DateOfBirth { get; set; }
-    }
+    public string FullName { get; set; } = null!;
+    public string Gender { get; set; } = null!;
+    public DateOnly DateOfBirth { get; set; }
 }

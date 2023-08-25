@@ -1,7 +1,6 @@
-﻿namespace DataAccess.Entity
+﻿namespace DataAccess.Entity;
+
+public class Patient : User
 {
-    public class Patient: User
-    {
-        public virtual List<Record> Records { get; set; } = null!;
-    }
+    public virtual List<Record> Records { get; set; } = null!;
 }

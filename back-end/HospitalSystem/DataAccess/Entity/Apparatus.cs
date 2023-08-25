@@ -1,11 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace DataAccess.Entity
+namespace DataAccess.Entity;
+
+[Owned]
+public class Apparatus : Entity
 {
-    [Owned]
-    public class Apparatus : Entity
-    {
-        public int SerialNumber { get; set; }
-        public int Functiional { get; set; }
-    }
+    public int SerialNumber { get; set; }
+    public int Functiional { get; set; }
 }

@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Services.Models;
 
-namespace Services.Models
+public class DoctorModel : UserModel
 {
-    public class DoctorModel : UserModel
-    {
-        public string Specialization { get; set; } = null!;
-    }
+    public string Specialization { get; set; } = null!;
 }

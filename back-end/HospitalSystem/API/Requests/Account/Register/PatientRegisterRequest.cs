@@ -1,9 +1,8 @@
 ﻿using Services.Models.Register;
 
-namespace API.Requests.Account.Register
+namespace API.Requests.Account.Register;
+
+public class PatientRegisterRequest : RegisterRequest
 {
-    public class PatientRegisterRequest: RegisterRequest
-    {
-        public override PatientRegisterRequest CreateModel() => CreateModel<RegisterModel>();
-    }
+    public override RegisterModel CreateModel() => CreateModel<RegisterModel>();
 }
