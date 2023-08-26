@@ -1,9 +1,7 @@
 ﻿using System.Linq.Expressions;
 using DataAccess;
-using DataAccess.Entity;
 using FluentResults;
 using Mapster;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Services.Constants;
 using Services.Interfaces;
@@ -17,11 +15,9 @@ public class CrudService<TModel, TEntity> : ICrudService<TModel>
 
 {
     protected readonly ApplicationContext _context;
-    protected readonly UserManager<User> _userManager;
 
-    public CrudService(ApplicationContext context, UserManager<User> userManager)
+    public CrudService(ApplicationContext context)
     {
-        _userManager = userManager;
         _context = context;
     }
 

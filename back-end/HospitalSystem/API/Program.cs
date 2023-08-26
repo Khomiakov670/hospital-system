@@ -10,7 +10,7 @@ using Services.Interfaces;
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
-var logging = builder.Logging;
+
 
 // Add services to the container.
 
@@ -22,19 +22,16 @@ services.AddSwaggerGen();
 services.Configure<PaginationOptions>(configuration.GetSection(PaginationOptions.Section))
         .Configure<AdminOptions>(configuration.GetSection(AdminOptions.Section));
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-void SetupAction(IdentityOptions options)
-{
-    options.Password.RequireNonAlphanumeric = false;
-}
-
-
-services.AddIdentity<User, IdentityRole>(SetupAction)
+services.AddIdentity<User, IdentityRole>(options => options.Password.RequireNonAlphanumeric = false)
         .AddEntityFrameworkStores<ApplicationContext>()
         .AddDefaultTokenProviders();
 
+
 var connectionString = configuration.GetConnectionString("DefaultConnection");
-services.AddDbContext<ApplicationContext>(options => options.UseSqlite(connectionString));
+services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(connectionString));
+
 
 services.AddTransient<IAccountService, AccountService>()
         .AddTransient<IEmailService, EmailService>();

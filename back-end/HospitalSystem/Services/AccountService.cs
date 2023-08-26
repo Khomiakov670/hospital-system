@@ -34,12 +34,12 @@ public class AccountService : IAccountService
         IOptions<AdminOptions> adminConfig,
         IEmailService emailService)
     {
-        this._userManager = userManager;
-        this._signInManager = signInManager;
-        this._context = context;
+        _userManager = userManager;
+        _signInManager = signInManager;
+        _context = context;
         InitializeAsync(userManager, roleManager, adminConfig.Value).Wait();
-        this._emailService = emailService;
-        this._configuration = configuration.Value;
+        _emailService = emailService;
+        _configuration = configuration.Value;
     }
 
     public async Task<Result> ChangePasswordAsync(string oldPassword, string newPassword, ClaimsPrincipal principal)
@@ -129,7 +129,7 @@ public class AccountService : IAccountService
     public Task<PageModel<UserModel>> GetPatientsAsync(int page, string query) =>
         GetUsers<UserModel, Patient>(page, query);
 
-    public Task<PageModel<DoctorModel>> GetDoctorsAsync(int page, string query, string? specialization = null)
+    public Task<PageModel<DoctorModel>> GetDoctorsAsync(int page, string query, string? specialization)
     {
         Expression<Func<Doctor, bool>>? predicate =
             specialization is null ? null : x => x.Specialization == specialization;
@@ -141,7 +141,7 @@ public class AccountService : IAccountService
         where TModel : UserModel
         where TEntity : User
     {
-        var users = _context.Set<TEntity>().Where(x => x.FullName.Contains(query) || x.Email.Contains(query));
+        var users = _context.Set<TEntity>().Where(x => x.Email != null && (x.FullName.Contains(query) || x.Email.Contains(query)));
         var itemsPerPage = Convert.ToInt32(_configuration.ItemsPerPage);
         if (predicate is not null)
             users = users.Where(predicate);

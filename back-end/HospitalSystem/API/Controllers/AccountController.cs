@@ -12,16 +12,16 @@ namespace API.Controllers;
 [Route(Routes.DefaultRoute)]
 public class AccountController : BaseController
 {
-    private readonly IAccountService userService;
+    private readonly IAccountService _userService;
 
-    public AccountController(IAccountService userService) => this.userService = userService;
+    public AccountController(IAccountService userService) => this._userService = userService;
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
     {
-        var result = await userService.LoginAsync(request.Email, request.Password);
+        var result = await _userService.LoginAsync(request.Email, request.Password);
         return HandleResult(result);
     }
 
@@ -45,7 +45,7 @@ public class AccountController : BaseController
         where TModel : UserModel
     {
         var model = request.CreateModel();
-        var result = await userService.RegisterAsync<TModel>(model);
+        var result = await _userService.RegisterAsync<TModel>(model);
         return HandleCreatedResult(result);
     }
 
@@ -53,92 +53,70 @@ public class AccountController : BaseController
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async void LogoutAsync() => await userService.LogoutAsync();
+    public async void LogoutAsync() => await _userService.LogoutAsync();
 
     [HttpGet]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<UserModel?>> InfoAsync() => await userService.GetUser(User);
+    public async Task<ActionResult<UserModel?>> InfoAsync() => await _userService.GetUser(User);
+    
+    [HttpGet]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<UserModel?>> GetUserId() => await _userService.GetUser(User);
+    
 
     [HttpGet]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<string?>> RoleAsync() => await userService.GetRole(User);
-
-
-/*
-        [HttpDelete]
-        [Authorize(Roles = Roles.CUSTOMER_SERVICE)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteAsync()
-        {
-            var result = await userService.DeleteAsync(User);
-            return HandleResult(result);
-        }
-
-        [HttpDelete("{id}")]
-        [Authorize(Roles = Roles.Service)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteAsync(string id)
-        {
-            var result = await userService.DeleteAsync(User, id);
-            return HandleResult(result);
-        }
+    public async Task<ActionResult<string?>> RoleAsync() => await _userService.GetRole(User);
 
 
 
+    [HttpDelete("{id}")]
+    [Authorize(Roles = Roles.Admin)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteAsync(string id)
+    {
+        var result = await _userService.DeleteAsync(id);
+        return HandleResult(result);
+    }
 
 
+    [HttpPatch]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordRequest model)
+    {
+        var result = await _userService.ChangePasswordAsync(model.OldPassword, model.NewPassword, User);
+        return HandleResult(result);
+    }
 
 
-        [HttpPatch]
-        [Authorize(Roles = Roles.CUSTOMER_SERVICE)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordRequest model)
-        {
-            var result = await userService.ChangePasswordAsync(model.OldPassword, model.NewPassword, User);
-            return HandleResult(result);
-        }
+    [HttpGet]
+    [Authorize(Roles = Roles.Admin)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<PageModel<DoctorModel>>> GetDoctors(int page = 1, string query = "", string? specialization = null
+        ) =>
+        await _userService.GetDoctorsAsync(page, query, specialization);
 
-
-
-
-        [HttpGet]
-        [Authorize(Roles = Roles.Service)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<PagedArrayModel<EmployeeModel>>> GetEmployees(int cateringId, int page = 1, string query = "") =>
-            await userService.GetEmployeesAsync(cateringId, page, query);
-
-        [HttpGet]
-        [Authorize(Roles = Roles.Admin)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<PagedArrayModel<LockableUserModel<ServiceModel>>>> GetServices(string? country, int page = 1, string query = "") =>
-            await userService.GetServicesAsync(page, query, country);
-
-        [HttpGet]
-        [Authorize(Roles = Roles.Admin)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<PagedArrayModel<LockableUserModel<UserModel>>>> GetCustomers(int page = 1, string query = "") =>
-            await userService.GetCustomersAsync(page, query);
-
-*/
+    [HttpGet]
+    [Authorize(Roles = Roles.Admin)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<PageModel<UserModel>>> GetPatients(int page = 1, string query = "") =>
+        await _userService.GetPatientsAsync(page, query);
 }

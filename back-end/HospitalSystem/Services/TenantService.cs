@@ -1,21 +1,20 @@
 ﻿using DataAccess;
 using DataAccess.Entity;
-using Microsoft.AspNetCore.Identity;
 using Services.Models;
 
 namespace Services;
 
-public class TenantService : CrudService<TenantModel, Tenant>
+public class TenantService : CrudService<TenantModel, Tenant>, ITenantService
 {
-    public TenantService(ApplicationContext context, UserManager<User> userManager) : base(context, userManager)
+    public TenantService(ApplicationContext context) : base(context)
     {
     }
-    public async Task<PageModel<TenantModel>> GetAsync(int page, int serialNumber, int functional, int wardNumber)
+    public async Task<PageModel<TenantModel>> GetAsync(int page, string query)
     {
         return await GetAsync(page, x => 
-                x.Apparatus.Functiional == functional || 
-                x.Apparatus.SerialNumber == serialNumber||
-                x.WardId == wardNumber, 
+                x.Apparatus != null && (x.Apparatus.Functiional.Equals(query) ||
+                                        x.Apparatus.SerialNumber.Equals(query) ||
+                                        x.Id.Equals(query)), 
             false, 
             x => x.Apparatus.Functiional);
     }
