@@ -1,74 +1,96 @@
-﻿using DataAccess.Entity;
+﻿using System.Linq.Expressions;
+using System.Security.Claims;
+using DataAccess.Entity;
 using DataAccess;
 using Services.Models;
 using FluentResults;
+using Microsoft.AspNetCore.Identity;
 using Services.Constants;
 
 namespace Services;
 
 public class RecordService : CrudService<RecordModel, Record>, IRecordService
 {
-    public RecordService(ApplicationContext context) : base(context) { }
-
-    public async Task<PageModel<RecordModel>> GetHistoryAsync(int page, string patientId)
+    private readonly UserManager<User> _userManager;
+    public RecordService(ApplicationContext context, UserManager<User> userManager) : base(context)
     {
-        return await GetAsync(page, 
-            x => x.PatientId == patientId && x.IsCured == true && x.DateOfClose != null,
-            false,
-            x => x.DateOfClose!);
+        _userManager = userManager;
     }
 
-    public async Task<PageModel<RecordModel>> GetAsync(int page, string query) =>
-        await base.GetAsync(page: page,
-            predicate: x => x.Diagnosis != null && (x.PatientId.Contains(query) ||
-                                                    x.Diagnosis.Contains(query) ||
-                                                    x.Symptoms.Contains(query)),
-            false,
-            x => x.Id);
-
-    public async Task<PageModel<RecordModel>> GetFilteredRecords(int page, string query, bool isCured, bool isApparatus)
+    public async Task<PageModel<RecordModel>> GetAsync(int page, string query,
+        bool? isCured,bool? useApparatus, DateOnly? startDate, DateOnly? endDate, ClaimsPrincipal patient)
     {
+        var patientId = _userManager.GetUserId(patient);
+        return await GetAsync(page,query,isCured,useApparatus,startDate,endDate,patientId);
+    }
+
+   
+
+    public async Task<PageModel<RecordModel>> GetAsync(int page, string query,
+        bool? isCured,bool? useApparatus, DateOnly? startDate, DateOnly? endDate, string? patientId = null
+        )
+    {
+        var expressions = new List<Expression<Func<Record, bool>>>()
+        {
+            x =>
+                 x.PatientId.Contains(query) ||
+                 x.Diagnosis == null || x.Diagnosis.Contains(query) ||
+                 x.Symptoms.Contains(query)
+        };
+        
+        if (isCured is not null)
+        {
+            expressions.Add(x => isCured == x.IsCured);
+        }
+
+        if (useApparatus is not null)
+        {
+            expressions.Add(x => useApparatus == x.UseApparatus);
+        } 
+        
+        if (startDate is not null)
+        {
+            expressions.Add(x => x.DateOfClose >= startDate);
+        }
+        if (endDate is not null)
+        {
+            expressions.Add(x => x.DateOfClose <= endDate);
+        }
+        if (patientId is not null)
+        {
+            expressions.Add(x => x.PatientId == patientId);
+        }
+
         return await base.GetAsync(page: page,
-            predicate: x => x.Diagnosis != null && (
-                x.PatientId.Contains(query) ||
-                (isCured && x.IsCured) ||
-                (isApparatus && x.UseApparatus) ||
-                x.Diagnosis.Contains(query) ||
-                x.Symptoms.Contains(query)
-            ),
-            false,
-            x => x.Id);
+            keySelector: x => x.Id,
+            isDesc: false,
+            predicates: expressions.ToArray()
+        );
     }
 
-    
+
 /* To Controller
      startDate ??= DateOnly.MinValue;
      endDate ??= DateOnly.MaxValue;
     */
-    public async Task<PageModel<RecordModel>> GetByDateAsync(int page, DateOnly startDate , DateOnly endDate)
+    /*public async Task<PageModel<RecordModel>> GetByDateAsync(int page )
     {
-        return await GetAsync(page, x =>
-                DateInRange(x.DateOfClose, startDate,endDate) ||
-                DateInRange(x.DateOfOpen, startDate,endDate),
-                false,
-                x => x.Id);
-    }
-    
+        return await GetAsync(page,
+            x => x.Id, false, x =>
+                DateInRange(x.DateOfClose, startDate, endDate) ||
+                DateInRange(x.DateOfOpen, startDate, endDate));
+    }*/
+
     public async Task<Result> CloseRecordAsync(int page, int recordId)
     {
         var record = await _context.Records.FindAsync(recordId);
-        
-        if (record is null) 
-            return Result.Fail(Errors.NotFound);  
+
+        if (record is null)
+            return Result.Fail(Errors.NotFound);
         record.IsCured = true;
-        
+
         _context.Update(record);
         await _context.SaveChangesAsync();
         return Result.Ok();
-    }
-    
-    private static bool DateInRange(DateOnly? dateToCheck, DateOnly startDate, DateOnly endDate)
-    {
-        return dateToCheck == null || dateToCheck >= startDate && dateToCheck < endDate;
     }
 }

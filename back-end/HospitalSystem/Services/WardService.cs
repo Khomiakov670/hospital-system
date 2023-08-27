@@ -12,9 +12,7 @@ public class WardService: CrudService<WardModel, Ward>, IWardService
     }
     public async Task<PageModel<WardModel>> GetAsync(int page, string query) =>
         await base.GetAsync(page: page,
-            predicate: x => x.Floor.Equals(query)||
-                            x.Capacity.Equals(query) ||
-                            x.Type.Contains(query),
-                            false,
-                            x => x.Id);
+                            keySelector: x => x.Id, isDesc: false, predicates: x => x.Floor.Equals(query)||
+                                x.Capacity.Equals(query) ||
+                                x.Type.Contains(query));
 }

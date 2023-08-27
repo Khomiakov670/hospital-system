@@ -57,6 +57,22 @@ public class CrudService<TModel, TEntity> : ICrudService<TModel>
     }
 
     protected async Task<PageModel<TModel>> GetAsync(int page,
+        Expression<Func<TEntity, object>> keySelector,
+        bool isDesc,
+        params Expression<Func<TEntity, bool>>[] predicates)
+    {
+        IQueryable<TEntity> query = _context.Set<TEntity>();
+        query = predicates.Aggregate(query, (current, expression) => current.Where(expression));
+        var queryOrdered = isDesc ? query.OrderByDescending(keySelector) : query.OrderBy(keySelector);
+
+        var entities = await queryOrdered.Skip((page - 1) * 10)
+            .Take(10)
+            .ToListAsync();
+        var models = entities.Adapt<List<TModel>>();
+        return new PageModel<TModel>(models, queryOrdered.Count());
+    }
+    
+    /*protected async Task<PageModel<TModel>> GetAsync(int page,
         Expression<Func<TEntity, bool>> predicate,
         bool isDesc = false,
         params Expression<Func<TEntity, object>>[] keySelectors)
@@ -84,5 +100,5 @@ public class CrudService<TModel, TEntity> : ICrudService<TModel>
             .ToListAsync();
         var models = entities.Adapt<List<TModel>>();
         return new PageModel<TModel>(models, query.Count());
-    }
+    }*/
 }
