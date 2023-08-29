@@ -15,6 +15,7 @@ public class ApplicationContext : IdentityDbContext<User>
     public DbSet<Record> Records { get; set; } = null!;
     public DbSet<Tenant> Tenants { get; set; } = null!;
     public DbSet<Ward> Wards { get; set; } = null!;
+    public DbSet<Snapshots> Snapshots { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

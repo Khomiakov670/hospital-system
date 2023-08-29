@@ -29,7 +29,7 @@ public class AccountController : BaseController
     [Authorize(Roles = Roles.Admin)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<UserModel>> RegisterAsync([FromBody] RegisterRequest request) =>
+    public async Task<ActionResult<UserModel>> RegisterAsync([FromBody] PatientRegisterRequest request) =>
         await RegisterAsync<UserModel>(request);
 
 
@@ -65,7 +65,7 @@ public class AccountController : BaseController
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<UserModel?>> GetUserId() => await _userService.GetUser(User);
+    public ActionResult<string?> GetUserId() =>  _userService.GetUserId(User);
     
 
     [HttpGet]

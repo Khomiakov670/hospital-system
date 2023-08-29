@@ -3,7 +3,7 @@
 namespace DataAccess.Entity;
 
 [Owned]
-public class Treatment : Entity
+public class Treatment
 {
     public string? Medicines { get; set; }
     public string? Procedures { get; set; }

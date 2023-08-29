@@ -1,6 +1,6 @@
 ﻿namespace Services.Models;
 
-public class TreatmentModel : EntityModel
+public class TreatmentModel
 {
     public string? Medicines { get; set; }
     public string? Procedures { get; set; }

@@ -1,36 +1,61 @@
-﻿using MailKit.Net.Smtp;
-using Microsoft.Extensions.Configuration;
+﻿using FluentResults;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using Microsoft.Extensions.Options;
 using MimeKit;
 using Services.Interfaces;
+using Services.Options;
 
 namespace Services;
 
 public class EmailService : IEmailService
 {
-    private readonly IConfiguration _configuration;
+    private readonly EmailOptions _options;
 
-    public EmailService(IConfiguration configuration)
+    public EmailService(IOptions<EmailOptions> options)
     {
-        _configuration = configuration;
+        _options = options.Value;
     }
 
-    public async Task SendEmailAsync(string email, string subject, string message)
+    public async Task<Result> SendEmailAsync(string email, string subject, string body)
     {
         var emailMessage = new MimeMessage();
+        var addressFrom = new MailboxAddress(_options.Username,
+            _options.From);
+        var addressTo = new MailboxAddress(string.Empty,
+            email);
 
-        emailMessage.From.Add(new MailboxAddress(_configuration["EmailConfiguration:UserName"],
-            _configuration["EmailConfiguration:From"]));
-        emailMessage.To.Add(new MailboxAddress(string.Empty, email));
+        emailMessage.From.Add(addressFrom);
+        emailMessage.To.Add(addressTo);
         emailMessage.Subject = subject;
-        emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = message };
+        emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+        {
+            Text = body,
+        };
 
         using var client = new SmtpClient();
-        await client.ConnectAsync(_configuration["EmailConfiguration:SmtpServer"],
-            int.Parse(_configuration["EmailConfiguration:Port"]!),
-            useSsl: true);
-        client.Authenticate(_configuration["EmailConfiguration:From"],
-            _configuration["EmailConfiguration:Password"]);
-        await client.SendAsync(emailMessage);
-        await client.DisconnectAsync(true);
+
+        var smtpServer = _options.SmptServer;
+        var port = int.Parse(_options.Port);
+
+        try
+        {
+            await client.ConnectAsync(smtpServer,
+                port,
+                SecureSocketOptions.StartTls);
+            await client.AuthenticateAsync(addressFrom.Address,
+                _options.Password);
+            await client.SendAsync(emailMessage);
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(ex.Message);
+        }
+        finally
+        {
+            await client.DisconnectAsync(true);
+        }
+
+        return Result.Ok();
     }
 }

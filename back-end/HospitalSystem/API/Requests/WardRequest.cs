@@ -10,4 +10,6 @@ public class WardRequest: IRequestBody
     public string Type { get; set; } = null!;
     [Required]
     public int Capacity { get; set; }
+    [Required]
+    public int Number { get; set; }
 }

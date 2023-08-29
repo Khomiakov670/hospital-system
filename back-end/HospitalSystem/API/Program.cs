@@ -1,11 +1,6 @@
-    using API.Options;
+using API.Extensions;
 using DataAccess;
-using DataAccess.Entity;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Services;
-using Services.Configs;
-using Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -19,22 +14,17 @@ services.AddControllers();
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 
-services.Configure<PaginationOptions>(configuration.GetSection(PaginationOptions.Section))
-        .Configure<AdminOptions>(configuration.GetSection(AdminOptions.Section));
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-services.AddIdentity<User, IdentityRole>(options => options.Password.RequireNonAlphanumeric = false)
-        .AddEntityFrameworkStores<ApplicationContext>()
-        .AddDefaultTokenProviders();
-
 
 var connectionString = configuration.GetConnectionString("DefaultConnection");
-services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(connectionString));
+services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(connectionString))
+    .AddServicesOptions(builder.Configuration)
+    .AddIdentity()
+    .AddAuth()
+    .AddBusinessLogicServices();
 
-
-services.AddTransient<IAccountService, AccountService>()
-        .AddTransient<IEmailService, EmailService>();
 
 services.ConfigureApplicationCookie(options =>
 {
@@ -52,7 +42,7 @@ services.ConfigureApplicationCookie(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
-var app = builder.Build();  
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

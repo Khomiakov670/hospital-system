@@ -8,15 +8,15 @@ namespace API.Controllers;
 
 public class WardController: CrudController<WardModel, WardRequest>
 {
-    public WardController(ICrudService<WardModel> service) : base(service)
+    public WardController(IWardService service) : base(service)
     {
     }
     
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<PageModel<WardModel>>> GetAsync(string query, int page = 1)
+    public async Task<ActionResult<PageModel<WardModel>>> GetAsync(int? floor = null,int? capacity = null,int? number = null, string type = "", int page = 1)
     {
         var wardService = service as IWardService;
-        return await wardService!.GetAsync(page, query);
+        return await wardService!.GetAsync(page, type, floor, capacity, number);
     }
 }

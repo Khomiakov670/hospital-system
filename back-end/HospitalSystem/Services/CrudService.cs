@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Security.Claims;
 using DataAccess;
 using FluentResults;
 using Mapster;
@@ -21,16 +22,17 @@ public class CrudService<TModel, TEntity> : ICrudService<TModel>
         _context = context;
     }
 
-    public async Task<Result<TModel>> AddAsync(TModel model)
+    public virtual async Task<Result<TModel>> AddAsync(TModel model, ClaimsPrincipal? principal = null)
     {
         var entity = model.Adapt<TEntity>();
         await _context.AddAsync(entity);
 
         await _context.SaveChangesAsync();
-        return Result.Ok();
+        var response = entity.Adapt<TModel>();
+        return Result.Ok(response);
     }
 
-    public async Task<Result> DeleteAsync(int id)
+    public virtual async Task<Result> DeleteAsync(int id, ClaimsPrincipal? principal = null)
     {
         var entity = await _context.FindAsync<TEntity>(id);
         if (entity is null)
@@ -41,7 +43,7 @@ public class CrudService<TModel, TEntity> : ICrudService<TModel>
         return Result.Ok();
     }
 
-    public async Task<Result> EditAsync(TModel model)
+    public virtual async Task<Result> EditAsync(TModel model, ClaimsPrincipal? principal = null)
     {
         var entity = model.Adapt<TEntity>();
         _context.Update(entity);
@@ -50,7 +52,7 @@ public class CrudService<TModel, TEntity> : ICrudService<TModel>
         return Result.Ok();
     }
 
-    public async Task<TModel?> GetByIdAsync(int id)
+    public virtual async Task<TModel?> GetByIdAsync(int id)
     {
         var entity = await _context.FindAsync<TEntity>(id);
         return entity?.Adapt<TModel>();

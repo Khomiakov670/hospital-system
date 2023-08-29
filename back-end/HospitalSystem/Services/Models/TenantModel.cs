@@ -2,6 +2,5 @@
 
 public class TenantModel : EntityModel
 {
-    public int WardNumber { get; set; }
-    public ApparatusModel? Apparatus { get; set; }
+    public int WardId { get; set; }
 }

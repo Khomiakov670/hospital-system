@@ -26,8 +26,8 @@ public abstract class CrudController<TModel, TRequest> : BaseController
     public virtual async Task<ActionResult<TModel>> AddAsync([FromBody] TRequest request)
     {
         var model = request.Adapt<TModel>();
-        var result = await service.AddAsync(model);
-        return HandleResult(result);
+        var result = await service.AddAsync(model, User);
+        return HandleCreatedResult(result);
     }
 
     [HttpPut]
@@ -38,7 +38,7 @@ public abstract class CrudController<TModel, TRequest> : BaseController
     {
         var model = request.Adapt<TModel>();
         model.Id = id;
-        var result = await service.EditAsync(model);
+        var result = await service.EditAsync(model, User);
         return HandleResult(result);
     }
 
@@ -48,7 +48,7 @@ public abstract class CrudController<TModel, TRequest> : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public virtual async Task<IActionResult> DeleteAsync(int id)
     {
-        var result = await service.DeleteAsync(id);
+        var result = await service.DeleteAsync(id, User);
         return HandleResult(result);
     }
 }

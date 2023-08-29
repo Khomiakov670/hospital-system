@@ -67,30 +67,31 @@ public class RecordService : CrudService<RecordModel, Record>, IRecordService
             predicates: expressions.ToArray()
         );
     }
+    
 
-
-/* To Controller
-     startDate ??= DateOnly.MinValue;
-     endDate ??= DateOnly.MaxValue;
-    */
-    /*public async Task<PageModel<RecordModel>> GetByDateAsync(int page )
-    {
-        return await GetAsync(page,
-            x => x.Id, false, x =>
-                DateInRange(x.DateOfClose, startDate, endDate) ||
-                DateInRange(x.DateOfOpen, startDate, endDate));
-    }*/
-
-    public async Task<Result> CloseRecordAsync(int page, int recordId)
+    public async Task<Result> CloseRecordAsync(int page, int recordId, DateOnly dateOfClose)
     {
         var record = await _context.Records.FindAsync(recordId);
 
         if (record is null)
             return Result.Fail(Errors.NotFound);
         record.IsCured = true;
+        record.DateOfClose = dateOfClose;
 
         _context.Update(record);
         await _context.SaveChangesAsync();
         return Result.Ok();
+    }
+
+    public override Task<Result<RecordModel>> AddAsync(RecordModel model, ClaimsPrincipal principal)
+    {
+        model.DoctorId = _userManager.GetUserId(principal)!;
+        return base.AddAsync(model, principal);
+    }
+
+    public override Task<Result> EditAsync(RecordModel model, ClaimsPrincipal principal)
+    {
+        model.DoctorId = _userManager.GetUserId(principal)!;
+        return base.EditAsync(model, principal);
     }
 }

@@ -1,6 +1,9 @@
-﻿namespace Services.Interfaces;
+﻿using FluentResults;
+
+namespace Services.Interfaces;
 
 public interface IEmailService
 {
-    Task SendEmailAsync(string email, string subject, string message);
+    
+    Task<Result> SendEmailAsync(string email, string subject, string body);
 }

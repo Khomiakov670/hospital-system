@@ -3,6 +3,7 @@ using System;
 using DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20230828142955_WardAddedNumber")]
+    partial class WardAddedNumber
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,31 +27,6 @@ namespace DataAccess.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("DataAccess.Entity.Apparatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Functional")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SerialNumber")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TenantId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TenantId")
-                        .IsUnique();
-
-                    b.ToTable("Apparatus");
-                });
 
             modelBuilder.Entity("DataAccess.Entity.Record", b =>
                 {
@@ -97,36 +75,6 @@ namespace DataAccess.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("Records");
-                });
-
-            modelBuilder.Entity("DataAccess.Entity.Snapshots", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ApparatusId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("DiastolicPressure")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Pulse")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SystolicPressure")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApparatusId");
-
-                    b.ToTable("Snapshots");
                 });
 
             modelBuilder.Entity("DataAccess.Entity.Tenant", b =>
@@ -400,17 +348,6 @@ namespace DataAccess.Migrations
                     b.ToTable("Patients");
                 });
 
-            modelBuilder.Entity("DataAccess.Entity.Apparatus", b =>
-                {
-                    b.HasOne("DataAccess.Entity.Tenant", "Tenant")
-                        .WithOne("Apparatus")
-                        .HasForeignKey("DataAccess.Entity.Apparatus", "TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-                });
-
             modelBuilder.Entity("DataAccess.Entity.Record", b =>
                 {
                     b.HasOne("DataAccess.Entity.Doctor", "Doctor")
@@ -460,17 +397,6 @@ namespace DataAccess.Migrations
                     b.Navigation("Treatment");
                 });
 
-            modelBuilder.Entity("DataAccess.Entity.Snapshots", b =>
-                {
-                    b.HasOne("DataAccess.Entity.Apparatus", "Apparatus")
-                        .WithMany()
-                        .HasForeignKey("ApparatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Apparatus");
-                });
-
             modelBuilder.Entity("DataAccess.Entity.Tenant", b =>
                 {
                     b.HasOne("DataAccess.Entity.Ward", "Ward")
@@ -478,6 +404,27 @@ namespace DataAccess.Migrations
                         .HasForeignKey("WardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.OwnsOne("DataAccess.Entity.Apparatus", "Apparatus", b1 =>
+                        {
+                            b1.Property<int>("TenantId")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Functional")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("SerialNumber")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("TenantId");
+
+                            b1.ToTable("Tenants");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId");
+                        });
+
+                    b.Navigation("Apparatus");
 
                     b.Navigation("Ward");
                 });
@@ -549,11 +496,6 @@ namespace DataAccess.Migrations
                         .HasForeignKey("DataAccess.Entity.Patient", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("DataAccess.Entity.Tenant", b =>
-                {
-                    b.Navigation("Apparatus");
                 });
 
             modelBuilder.Entity("DataAccess.Entity.Ward", b =>

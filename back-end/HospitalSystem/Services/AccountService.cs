@@ -74,9 +74,10 @@ public class AccountService : IAccountService
         var password = new Password(12).IncludeNumeric().IncludeLowercase().IncludeUppercase().Next();
         var result = await _userManager.CreateAsync(user, password);
         if (!result.Succeeded) return HandleResult(result);
+        result = await _userManager.AddToRoleAsync(user, model.GetRole());
+        if (!result.Succeeded) return HandleResult(result);
         _ = _emailService.SendEmailAsync(user.Email!, "Registration", $"Hi! Your password is: {password}");
         return Result.Ok(user.Adapt<TModel>());
-
     }
 
     public async Task<UserModel?> GetUser(ClaimsPrincipal principal)
